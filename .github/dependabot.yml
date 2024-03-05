@@ -5,7 +5,51 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
+  - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    assignees:
+      - "dependabot[bot]"
+    commit-message:
+      prefix: "chore(go deps): update"
+    labels:
+      - "dependencies"
+      - "golang"
+    pull-request-branch-name:
+      separator: "-"
+    reviewers:
+      - "mrigesh"
+      - "bhatua"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "dependabot[bot]"
+    commit-message:
+      prefix: "chore(github-actions deps): update"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    pull-request-branch-name:
+      separator: "-"
+    reviewers:
+      - "mrigesh"
+      - "bhatua"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "dependabot[bot]"
+    commit-message:
+      prefix: "chore(docker deps): update"
+    labels:
+      - "dependencies"
+      - "docker"
+    pull-request-branch-name:
+      separator: "-"
+    reviewers:
+      - "mrigesh"
+      - "bhatua"
