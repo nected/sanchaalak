@@ -18,15 +18,26 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
-	// "github.com/nected/sanchaalak/src/services"
-
+	"github.com/nected/sanchaalak/src/config"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
-// electCmd represents the elect command
-var electCmd = &cobra.Command{
-	Use:   "elect",
+var selectedCmd string
+
+var supportedFlags = map[string]func(){
+	"config": generateConfigFile,
+	"test": func() {
+		fmt.Println("test")
+	},
+}
+
+// generateCmd represents the generate command
+var generateCmd = &cobra.Command{
+	Use:   "generate",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -35,20 +46,43 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("elect called")
+		if fn, ok := supportedFlags[selectedCmd]; ok {
+			fn()
+		} else {
+			fmt.Println("Invalid module selected")
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(electCmd)
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// electCmd.PersistentFlags().String("foo", "", "A help for foo")
+	helpMessage := fmt.Sprintf("Generator for supported modules. Supported modules are:")
+	for flag := range supportedFlags {
+		helpMessage = fmt.Sprintf("%s \n - %s", helpMessage, flag)
+	}
+	generateCmd.Flags().StringVar(&selectedCmd, "module", "", helpMessage)
+	rootCmd.AddCommand(generateCmd)
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// electCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func generateConfigFile() {
+	config := config.NewConfig()
+	config.GenerateDefaults()
+
+	data, err := yaml.Marshal(config)
+	if err != nil {
+		fmt.Println(err)
+	}
+	f, err := os.Create(viper.ConfigFileUsed())
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer f.Close()
+
+	_, err = f.Write(data)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

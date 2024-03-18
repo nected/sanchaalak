@@ -1,0 +1,10 @@
+app:
+    name: sanchaalak
+server:
+    host: localhost
+    port: 8080
+raft:
+    storagePath: /tmp/sanchaalak
+    node:
+        id: node-1
+        address: localhost:8080

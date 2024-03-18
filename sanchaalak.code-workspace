@@ -4,7 +4,21 @@
 			"path": "."
 		}
 	],
-	"settings": {},
+	"settings": {
+		"[go]": {
+			"editor.insertSpaces": false,
+			"editor.formatOnSave": true,
+			"editor.defaultFormatter": "golang.go",
+			
+		},
+		"go.testOnSave": true,
+		"go.coverOnSave": true,
+		"go.coverMode": "atomic",
+		"gopls": {
+			"ui.semanticTokens": true,
+			"formatting.gofumpt": true
+		}
+	},
 	"extensions": {
 		"recommendations": [
 			"ms-vscode.makefile-tools"
