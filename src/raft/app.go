@@ -14,13 +14,13 @@ import (
 	"github.com/hashicorp/raft"
 )
 
-// wordTracker keeps track of the three longest words it ever saw.
-type wordTracker struct {
+// WordTracker keeps track of the three longest words it ever saw.
+type WordTracker struct {
 	mtx   sync.RWMutex
 	words [3]string
 }
 
-var _ raft.FSM = &wordTracker{}
+var _ raft.FSM = &WordTracker{}
 
 // compareWords returns true if a is longer (lexicography breaking ties).
 func compareWords(a, b string) bool {
@@ -36,7 +36,7 @@ func cloneWords(words [3]string) []string {
 	return ret[:]
 }
 
-func (f *wordTracker) Apply(l *raft.Log) interface{} {
+func (f *WordTracker) Apply(l *raft.Log) interface{} {
 	f.mtx.Lock()
 	defer f.mtx.Unlock()
 	w := string(l.Data)
@@ -50,12 +50,12 @@ func (f *wordTracker) Apply(l *raft.Log) interface{} {
 	return nil
 }
 
-func (f *wordTracker) Snapshot() (raft.FSMSnapshot, error) {
+func (f *WordTracker) Snapshot() (raft.FSMSnapshot, error) {
 	// Make sure that any future calls to f.Apply() don't change the snapshot.
 	return &snapshot{cloneWords(f.words)}, nil
 }
 
-func (f *wordTracker) Restore(r io.ReadCloser) error {
+func (f *WordTracker) Restore(r io.ReadCloser) error {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
@@ -81,12 +81,19 @@ func (s *snapshot) Persist(sink raft.SnapshotSink) error {
 func (s *snapshot) Release() {
 }
 
-type rpcInterface struct {
-	wordTracker *wordTracker
+type RpcInterface struct {
+	wordTracker *WordTracker
 	raft        *raft.Raft
 }
 
-func (r rpcInterface) AddWord(ctx context.Context, req *pb.AddWordRequest) (*pb.AddWordResponse, error) {
+func NewRpcInterface(wordTracker *WordTracker, r *raft.Raft) *RpcInterface {
+	return &RpcInterface{
+		wordTracker: wordTracker,
+		raft:        r,
+	}
+}
+
+func (r RpcInterface) AddWord(ctx context.Context, req *pb.AddWordRequest) (*pb.AddWordResponse, error) {
 	f := r.raft.Apply([]byte(req.GetWord()), time.Second)
 	if err := f.Error(); err != nil {
 		return nil, rafterrors.MarkRetriable(err)
@@ -96,7 +103,7 @@ func (r rpcInterface) AddWord(ctx context.Context, req *pb.AddWordRequest) (*pb.
 	}, nil
 }
 
-func (r rpcInterface) GetWords(ctx context.Context, req *pb.GetWordsRequest) (*pb.GetWordsResponse, error) {
+func (r RpcInterface) GetWords(ctx context.Context, req *pb.GetWordsRequest) (*pb.GetWordsResponse, error) {
 	r.wordTracker.mtx.RLock()
 	defer r.wordTracker.mtx.RUnlock()
 	return &pb.GetWordsResponse{

@@ -6,6 +6,7 @@ require (
 	github.com/Jille/raft-grpc-example v0.0.0-20230824192955-047da3cb40f1
 	github.com/Jille/raft-grpc-leader-rpc v1.1.0
 	github.com/Jille/raft-grpc-transport v1.5.0
+	github.com/Jille/raftadmin v1.2.0
 	github.com/hashicorp/raft v1.6.1
 	github.com/hashicorp/raft-boltdb v0.0.0-20231211162105-6c830fa4535e
 	github.com/nected/go-lib v0.0.1

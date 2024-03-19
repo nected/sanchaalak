@@ -22,12 +22,16 @@ type ServerConfig struct {
 	Port int    `json:"port" yaml:"port" default:"8080"`
 }
 
+type RaftNodeInfo struct {
+	ID      string `json:"id" yaml:"id" default:"node1"`
+	Address string `json:"address" yaml:"address" default:"127.0.0.1:1234"`
+}
+
 type RaftConfig struct {
-	StoragePath string `json:"storagePath" yaml:"storagePath" default:"/tmp/sanchaalak/raft"`
-	NodeInfo    struct {
-		ID      string `json:"id" yaml:"id" default:"node1"`
-		Address string `json:"address" yaml:"address" default:"127.0.0.1:1234"`
-	} `json:"node" yaml:"node"`
+	StoragePath string       `json:"storagePath" yaml:"storagePath" default:"/tmp/sanchaalak/raft"`
+	LogFile     string       `json:"logFile" yaml:"logFile" default:"logs.dat"`
+	StableFile  string       `json:"stableFile" yaml:"stableFile" default:"stable.dat"`
+	NodeInfo    RaftNodeInfo `json:"nodeInfo" yaml:"nodeInfo"`
 }
 
 var (

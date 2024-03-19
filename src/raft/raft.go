@@ -21,6 +21,7 @@ type RaftServer struct {
 func NewRaftServer(ctx context.Context, nodeID, nodeAddress string, fsm raft.FSM, raftBootstrap bool) (server *RaftServer, err error) {
 	c := raft.DefaultConfig()
 	c.LocalID = raft.ServerID(nodeID)
+	server = &RaftServer{}
 
 	baseDir := filepath.Join("/tmp/", nodeID)
 
@@ -64,4 +65,12 @@ func NewRaftServer(ctx context.Context, nodeID, nodeAddress string, fsm raft.FSM
 	server.raft = r
 	server.transportManager = tm
 	return server, nil
+}
+
+func (r *RaftServer) Raft() *raft.Raft {
+	return r.raft
+}
+
+func (r *RaftServer) TransportManager() *transport.Manager {
+	return r.transportManager
 }
