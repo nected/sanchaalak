@@ -4,10 +4,46 @@
 			"path": "."
 		}
 	],
-	"settings": {},
+	"settings": {
+		"[go]": {
+			"editor.insertSpaces": false,
+			"editor.formatOnSave": true,
+			"editor.defaultFormatter": "golang.go",
+			
+		},
+		"go.testOnSave": true,
+		"go.coverOnSave": true,
+		"go.coverMode": "atomic",
+		"gopls": {
+			"ui.semanticTokens": true,
+			"formatting.gofumpt": true
+		}
+	},
 	"extensions": {
 		"recommendations": [
 			"ms-vscode.makefile-tools"
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Run generate function",
+				"type": "go",
+				"request": "launch",
+				"mode": "debug",
+				"program": "${workspaceFolder}",
+				"args": ["generate","--module", "config"]
+			},
+			{
+				"name": "Run raft server: elect",
+				"type": "go",
+				"request": "launch",
+				"mode": "debug",
+				"program": "${workspaceFolder}",
+				"args": ["elect"]
+			}
+
 		]
 	}
 }

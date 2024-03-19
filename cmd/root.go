@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nected/sanchaalak/src/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -57,7 +58,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sanchaalak.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is <APP DIR>/sanchaalak.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -70,14 +71,22 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
+		// Find cwd directory.
+		cwd, err := os.Getwd()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".sanchaalak" (without extension).
-		viper.AddConfigPath(home)
+		configPaths := []string{
+			"/etc/sanchaalak",
+			"$HOME/sanchaalak",
+			fmt.Sprintf("%s/", cwd),
+		}
+
+		// Search config in current working directory with name "sanchaalak" (without extension).
+		for _, path := range configPaths {
+			viper.AddConfigPath(path)
+		}
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".sanchaalak")
+		viper.SetConfigName("sanchaalak")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -86,4 +95,15 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+
+	cfg := config.NewConfig()
+
+	if err := viper.Unmarshal(&cfg); err != nil {
+		fmt.Fprintln(os.Stderr, "Error unmarshalling config:", err)
+		os.Exit(1)
+	}
+
+	config.SetConfig(cfg)
+
+	fmt.Println(config.GetConfig())
 }

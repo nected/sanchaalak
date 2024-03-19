@@ -17,10 +17,23 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"net"
 
+	// "github.com/nected/sanchaalak/src/services"
+
+	"github.com/Jille/raft-grpc-example/proto"
+	"github.com/Jille/raft-grpc-leader-rpc/leaderhealth"
+	"github.com/Jille/raftadmin"
+	"github.com/nected/sanchaalak/src/config"
+	"github.com/nected/sanchaalak/src/raft"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
+
+var bootstrap bool
 
 // electCmd represents the elect command
 var electCmd = &cobra.Command{
@@ -34,6 +47,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("elect called")
+		runElect()
 	},
 }
 
@@ -49,4 +63,44 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// electCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	electCmd.Flags().BoolVarP(&bootstrap, "bootstrap", "b", false, "Bootstrap the cluster")
+}
+
+func runElect() {
+	context := context.Background()
+	config := config.GetConfig()
+	wt := raft.WordTracker{}
+
+	_, port, err := net.SplitHostPort(config.Raft.NodeInfo.Address)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	sock, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	rSvr, err := raft.NewRaftServer(context, config.Raft.NodeInfo.ID, config.Raft.NodeInfo.Address, &wt, bootstrap)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	s := grpc.NewServer()
+
+	rpcInterface := raft.NewRpcInterface(&wt, rSvr.Raft())
+
+	proto.RegisterExampleServer(s, rpcInterface)
+
+	rSvr.TransportManager().Register(s)
+
+	leaderhealth.Setup(rSvr.Raft(), s, []string{"Example"})
+	raftadmin.Register(s, rSvr.Raft())
+	reflection.Register(s)
+
+	if err := s.Serve(sock); err != nil {
+		fmt.Println(err)
+		return
+	}
 }
