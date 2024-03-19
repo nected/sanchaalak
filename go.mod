@@ -8,7 +8,7 @@ require (
 	github.com/Jille/raft-grpc-transport v1.5.0
 	github.com/hashicorp/raft v1.6.1
 	github.com/hashicorp/raft-boltdb v0.0.0-20231211162105-6c830fa4535e
-	github.com/nected/go-lib v0.0.0-20240306115934-3c5f51f83f83
+	github.com/nected/go-lib v0.0.0-20240319063326-318b5ec3b4a1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	google.golang.org/grpc v1.59.0

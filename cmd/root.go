@@ -83,8 +83,6 @@ func initConfig() {
 			fmt.Sprintf("%s/", cwd),
 		}
 
-		fmt.Println(configPaths)
-
 		// Search config in current working directory with name "sanchaalak" (without extension).
 		for _, path := range configPaths {
 			viper.AddConfigPath(path)

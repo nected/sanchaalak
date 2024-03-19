@@ -1,11 +1,16 @@
 package config
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/nected/go-lib/generators"
+)
 
 type Config struct {
 	AppConfig AppConfig    `json:"app" yaml:"app" `
 	Server    ServerConfig `json:"server" yaml:"server"`
 	Raft      RaftConfig   `json:"raft" yaml:"raft"`
+	Test      string       `json:"test" yaml:"test" default:"test"`
 }
 
 type AppConfig struct {
@@ -13,15 +18,15 @@ type AppConfig struct {
 }
 
 type ServerConfig struct {
-	Host string `json:"host" yaml:"host"`
-	Port int    `json:"port" yaml:"port"`
+	Host string `json:"host" yaml:"host" default:"127.0.0.1"`
+	Port int    `json:"port" yaml:"port" default:"8080"`
 }
 
 type RaftConfig struct {
-	StoragePath string `json:"storagePath" yaml:"storagePath"`
+	StoragePath string `json:"storagePath" yaml:"storagePath" default:"/tmp/sanchaalak/raft"`
 	NodeInfo    struct {
-		ID      string `json:"id" yaml:"id"`
-		Address string `json:"address" yaml:"address"`
+		ID      string `json:"id" yaml:"id" default:"node1"`
+		Address string `json:"address" yaml:"address" default:"127.0.0.1:1234"`
 	} `json:"node" yaml:"node"`
 }
 
@@ -45,10 +50,5 @@ func GetConfig() *Config {
 }
 
 func (c *Config) GenerateDefaults() {
-	c.AppConfig.Name = "sanchaalak"
-	c.Server.Host = "localhost"
-	c.Server.Port = 8080
-	c.Raft.StoragePath = "/tmp/sanchaalak"
-	c.Raft.NodeInfo.ID = "node-1"
-	c.Raft.NodeInfo.Address = "localhost:8080"
+	generators.GenerateDefaults(c)
 }
